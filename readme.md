@@ -51,10 +51,10 @@ This project implements a leak detection and abnormal flow monitoring system usi
 
 1. **Clone the repo**:
    ```bash
-   git clone https://github.com/yourusername/leak-monitor.git
-   cd leak-monitor
+   git clone https://github.com/Nolcad/WaterGuard.git
+   cd WaterGuard
 
-2. ** Open in Arduino IDE** or your preferred environment (e.g. PlatformIO).
+2. **Open in Arduino IDE** or your preferred environment (e.g. PlatformIO).
 
 3. **Upload** the sketch to your board.
 
