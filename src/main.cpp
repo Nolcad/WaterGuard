@@ -11,20 +11,20 @@
 
 // Leak monitoring period: 24 hours
 #define MONITORING_PERIOD (24 * 60 * 60)
-//#define MONITORING_PERIOD (30)
+// #define MONITORING_PERIOD (30)
 
 // Required inactivity time: 2 hours
 #define REQUIRED_INACTIVITY_TIME (2 * 60 * 60)
-//#define REQUIRED_INACTIVITY_TIME (15)
+// #define REQUIRED_INACTIVITY_TIME (15)
 
 // Abnormal continuous activity time: 2 hours
 #define ABNORMAL_ACTIVITY_TIME (2 * 60 * 60)
-//#define ABNORMAL_ACTIVITY_TIME (60)
+// #define ABNORMAL_ACTIVITY_TIME (60)
 
 // Minimal activity detection time to define the minimum flowrate: 1 minute (1
 // l/min)
-#define MINIMAL_ACTIVITY_TIME (1*60)
-//#define MINIMAL_ACTIVITY_TIME (5)
+#define MINIMAL_ACTIVITY_TIME (1 * 60)
+// #define MINIMAL_ACTIVITY_TIME (5)
 
 // True when a pulse is detected
 bool isPulseActive = false;
@@ -137,23 +137,27 @@ void loop() {
 
   // Activity check
   if (isPulseActive) {
-
     // Save last activity time
     lastActivityTime = secondTimer;
+
+    // Pulse, so: active flow (for now...)
     isFlowActive = true;
 
     // Reset pause
     isPauseActive = false;
     pauseTime = 0;
 
+    // Mirror input pulse on the LED
     ledControl(LED_PULSE, true);
   } else {
     // No pulse, pause may be starting...
     isPauseActive = true;
+
+    // Mirror input pulse on the LED
     ledControl(LED_PULSE, false);
   }
 
-  // Reset activity timer when time is out
+  // Reset flow state when time is out (we are below the minimum)
   if (secondTimer - lastActivityTime >= MINIMAL_ACTIVITY_TIME) {
     isFlowActive = false;
     flowActiveTime = 0;
@@ -167,20 +171,25 @@ void loop() {
 
   // Process monitoring time
   if (secondTimer - lastMonitoringStart >= MONITORING_PERIOD) {
+    // Signal we are at the end of the monitoring time
     isMonitoringPeriodExpired = true;
   }
 
+  // By using this expiration flag, we let a pause go on and allow it
+  // to expand over the monitoring period.
+  // But as soon has we detect a pulse, we process the monitoring window
   if (isMonitoringPeriodExpired && isPulseActive) {
-    // Reset and process alarm
+    // If a long enough pause was registered
     if (isPauseRegistered) {
       // Everything is OK
     } else {
       // Alarm!
       isLeakAlarm = true;
     }
+    // Clear and restart from here
+    isPauseRegistered = false;
     isMonitoringPeriodExpired = false;
     lastMonitoringStart = secondTimer;
-    isPauseRegistered = false;
   }
 
   // Process abnormal flow duration
